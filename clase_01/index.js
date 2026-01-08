@@ -86,3 +86,14 @@
     TERNARIOS (No los vamos a ver hoy.)
 */
  
+
+// var numero;
+
+// var color = null;
+
+// color = "Rojo"
+
+
+// console.log(numero)
+
+// console.log(color)

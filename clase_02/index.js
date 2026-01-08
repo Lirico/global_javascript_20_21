@@ -110,7 +110,7 @@ var booleano = false;
 
 // while(contador < 5) 
 // {
-//     console.log(contador + " While")
+//     console.log(contador)
 //     contador++
 // }
 
@@ -134,3 +134,56 @@ var booleano = false;
 // if(intentos === 3){
 //     console.log("Maximo de intentos excedido. Su cuenta ha sido restriginda por 24 hs.")
 // }
+
+
+///////////// BUCLE PARA (FOR) //////////
+
+
+// for (var contador = 0; contador < 5; contador++) {
+//     console.log(contador)
+// }
+
+/* 
+    Dani se encuentra en un hospital abandonado en el medio
+    de un apocalipsis zombie. El lugar carece de luz, y Dani
+    tiene en sus manos unicamente una linterna y una pistola.
+    La pistola tiene N balas. Dani está buscando provisiones
+    y decide ingresar a una de las habitaciones del hospital.
+    Al abrir la puerta se encuentra con 10 zombies que se dan
+    la vuelta para mirarlo. 
+    Afortunadamente Dani tiene el cheat para que cada bala
+    impacte directo en la cabeza de un zombie, pero... no puede
+    matar mas de uno con la misma bala.
+
+    Programar una secuencia que nos indique si Dani sobrevive
+    o falla y muere y le comen los deditos del pie.
+*/
+
+var balas = Math.round(Math.random() * 19);
+
+for (let zombies = 10; zombies > 0; zombies--) {
+    balas--
+}
+
+if(balas >= 0){
+    console.log("You survived, mission complete!")
+} else {
+    console.log("You died, mission failed!")
+}
+
+
+// Instructivo para el uso de libreria Math
+/* 
+    Math es una libreria de funciones matematicas.
+    Puedo realizar desde potencias y raices cuadradas, hasta
+    redondeos, cos, sen, y generacion aleatoria de numeros.
+
+    Math.random() genera numeros aleatorios entre 0 y 1.
+    Multiplicar el resultado de Math.random() por un numero
+    cualquiera hace que el rango de 0 a 1 se extienda hasta
+    el numero por el cual fue multiplicado.
+
+    Math.round() redondea un numero flotante a entero. El numero
+    que redondea es el que reciba dentro de los parentesis
+    de ejecicion de la funcion.
+*/
