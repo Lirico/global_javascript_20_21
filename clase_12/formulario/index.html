@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .none {
+            display: none;
+        }
+
+        .name_error,
+        .age_error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <form>
+        <input type="text" name="nombre" placeholder="Nombre">
+        <p class="name_error none">*Debe ingresar un nombre.</p>
+        <input type="text" name="edad" placeholder="Edad">
+        <p class="age_error none">*Debe ingresar una edad.</p>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script src="./index.js"></script>
+</body>
+
+</html>

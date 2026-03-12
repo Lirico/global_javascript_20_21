@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        canvas {
+            border: 2px solid black;
+            background-color: #eee;
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="400" height="300"></canvas>
+
+    <script>
+        const d = document;
+
+        const canvas = d.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Posicion inicial del cuadrado
+        let x = 50;
+        let y = 50;
+        const size = 30; // Tamanio del cuadradito en pixeles
+        const speed = 5; // Cantidad de pixeles que se mueve
+
+        // Funcion para dibujar el cuadrado
+        function drawSquare() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // limpiar canvas
+            ctx.fillStyle = "blue"; // color del cuadrado
+            ctx.fillRect(x, y, size, size); // dibujar cuadrado
+        }
+
+        function moveSquare(event) {
+            switch (event.key) {
+                case "ArrowUp":
+                    if (y - speed >= 0) y -= speed;
+                    break;
+                case "ArrowDown":
+                    if (y + speed <= canvas.height - size) y += speed;
+                    break;
+                case "ArrowLeft":
+                    if (x - speed >= 0) x -= speed;
+                    break;
+                case "ArrowRight":
+                    if (x + speed <= canvas.width - size) x += speed;
+                    break;
+            }
+            drawSquare();
+        }
+
+        // Evento para detectar las teclas del teclado
+        window.addEventListener("keydown", moveSquare);
+
+        // Dibujar el cuadrado al cargar la pagina
+        drawSquare();
+    </script>
+</body>
+
+</html>

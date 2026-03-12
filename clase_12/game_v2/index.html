@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atrapa el circulo</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            border: 2px solid black;
+            background-color: #f0f0f0;
+            display: block;
+            margin: 20px auto;
+        }
+
+        #score {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas" width="500" height="500"></canvas>
+    <div id="score">Puntaje: 0</div>
+
+    <script>
+        const d = document;
+        const canvas = d.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = d.getElementById('score');
+
+        // Jugador (cuadrado)
+        const player = {
+            y: 50,
+            x: 50,
+            size: 30,
+            speed: 7,
+            color: 'blue',
+        }
+
+        // Circulo objetivo
+        const target = {
+            x: 0,
+            y: 0,
+            radius: 15,
+            color: 'red',
+        }
+
+        let score = 0;
+
+        // Posicionar circulo en un lugar aleatorio del canvas
+        function placeTarget() {
+            target.x = Math.floor(Math.random() * (canvas.width - 2 * target.radius)) + target.radius;
+            target.y = Math.floor(Math.random() * (canvas.height - 2 * target.radius)) + target.radius;
+        }
+
+
+
+        // Dibuja jugador y objetivo
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibuja jugador (cuadrado)
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.size, player.size);
+
+            // Dibuja circulo objetivo
+            ctx.beginPath();
+            ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+            ctx.fillStyle = target.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // Detecta si el jugador atrapo el circulo (colision simple)
+        function checkCollision() {
+            // Calculamos el centro del jugador.
+            const playerCenterX = player.x + player.size / 2;
+            const playerCenterY = player.y + player.size / 2;
+
+            // Distancia entre el centro del jugador y el centro del circulo;
+            const dx = playerCenterX - target.x;
+            const dy = playerCenterY - target.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Si la distancia es menor a la suma de los radios (aproximamos al jugador como circulo);
+            const playerRadius = player.size / 2;
+            if (distance < playerRadius + target.radius) return true;
+            return false;
+        }
+
+        // Maneja el movimiento del jugador con las teclas
+        function movePlayer(event) {
+            switch (event.key) {
+                case 'ArrowUp':
+                    if (player.y - player.speed >= 0) player.y -= player.speed;
+                    break;
+                case 'ArrowDown':
+                    if (player.y + player.speed + player.size <= canvas.height) player.y += player.speed;
+                    break;
+                case 'ArrowLeft':
+                    if (player.x - player.speed >= 0) player.x -= player.speed;
+                    break;
+                case 'ArrowRight':
+                    if (player.x + player.speed + player.size <= canvas.width) player.x += player.speed;
+                    break;
+            }
+            update();
+        }
+
+        // Actualiza la pantalla y verifica colisiones
+        function update() {
+            if (checkCollision()) {
+                score++;
+                scoreDisplay.textContent = `Puntaje: ${score}`;
+                placeTarget();
+            }
+            draw()
+        }
+
+        // Inicializacion
+        placeTarget();
+        draw();
+
+        // Evento para mover el jugador
+        window.addEventListener('keydown', movePlayer);
+    </script>
+</body>
+
+</html>
