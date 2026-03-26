@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pilas y Colas - Ejemplo Interactivo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --primary-accent: #8b5cf6; /* Purple for Stack */
+            --secondary-accent: #0ea5e9; /* Blue for Queue */
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.15) 0px, transparent 50%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            background: linear-gradient(to right, #c4b5fd, #7dd3fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+        }
+
+        .stack-panel {
+            border-top: 4px solid var(--primary-accent);
+        }
+
+        .queue-panel {
+            border-top: 4px solid var(--secondary-accent);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rule {
+            font-size: 0.9rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .stack-rule { background-color: rgba(139, 92, 246, 0.2); color: #c4b5fd; }
+        .queue-rule { background-color: rgba(14, 165, 233, 0.2); color: #7dd3fc; }
+
+        .desc {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        /* Dropzones */
+        .dropzone {
+            width: 100%;
+            min-height: 250px;
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 0.75rem;
+            display: flex;
+            padding: 1rem;
+            gap: 0.5rem;
+            transition: background-color 0.3s, border-color 0.3s;
+            position: relative;
+        }
+
+        .dropzone.dragover {
+            background-color: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        /* Stack specific layout (Vertical, Bottom to Top) */
+        .stack-zone {
+            flex-direction: column-reverse; /* Reverses order so first child is at bottom */
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        /* Queue specific layout (Horizontal, Left to Right) */
+        .queue-zone {
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            overflow-x: auto;
+        }
+
+        /* Empty state placeholder */
+        .empty-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #64748b;
+            font-style: italic;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .has-items .empty-text {
+            opacity: 0;
+        }
+
+        /* Draggable Items */
+        .item {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #334155, #1e293b);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: grab;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: transform 0.2s, background 0.2s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .item:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        .item.stack-item {
+            background: linear-gradient(135deg, var(--primary-accent), #6d28d9);
+            width: 80%; /* Wider in stack */
+        }
+
+        .item.queue-item {
+            background: linear-gradient(135deg, var(--secondary-accent), #0284c7);
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        button {
+            background-color: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-pop:hover:not(:disabled) { border-color: var(--primary-accent); color: #c4b5fd; }
+        .btn-dequeue:hover:not(:disabled) { border-color: var(--secondary-accent); color: #7dd3fc; }
+
+        /* Generator Area */
+        .generator {
+            margin-top: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--glass-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .generator p {
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        .source-zone {
+            display: flex;
+            gap: 1rem;
+            min-height: 70px;
+            padding: 1rem;
+            border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 0.5rem;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .item-spawn {
+            background: linear-gradient(135deg, #475569, #334155);
+        }
+
+        /* Animations */
+        @keyframes popOut {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0) translateY(-20px); opacity: 0; }
+        }
+
+        @keyframes slideOut {
+            0% { transform: scale(1) translateX(0); opacity: 1; }
+            100% { transform: scale(0.5) translateX(-50px); opacity: 0; }
+        }
+
+        .animating-pop { animation: popOut 0.4s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .animating-dequeue { animation: slideOut 0.4s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Estructuras de Datos: Pilas y Colas</h1>
+    <p class="subtitle">Arrastra elementos desde el generador hacia las estructuras y observa cómo se comportan al momento de insertarlos o extraerlos.</p>
+
+    <div class="container">
+        <!-- Pila (Stack) Panel -->
+        <div class="panel stack-panel">
+            <h2>Pila (Stack) <span class="rule stack-rule">LIFO</span></h2>
+            <p class="desc">LIFO: Último en entrar, primero en salir (Last In, First Out). Como una pila de platos.</p>
+            
+            <div class="dropzone stack-zone" id="stack-zone">
+                <div class="empty-text">Arrastra aquí (Push)</div>
+                <!-- Elements will be appended here. Due to flex-direction: column-reverse, 
+                     appended elements appear at the top visually. -->
+            </div>
+
+            <div class="controls">
+                <button class="btn-pop" id="btn-pop" disabled>Extraer (Pop)</button>
+            </div>
+        </div>
+
+        <!-- Cola (Queue) Panel -->
+        <div class="panel queue-panel">
+            <h2>Cola (Queue) <span class="rule queue-rule">FIFO</span></h2>
+            <p class="desc">FIFO: Primero en entrar, primero en salir (First In, First Out). Como una fila en el supermercado.</p>
+            
+            <div class="dropzone queue-zone" id="queue-zone">
+                <div class="empty-text">Arrastra aquí (Enqueue)</div>
+                <!-- Elements appended left-to-right -->
+            </div>
+
+            <div class="controls">
+                <button class="btn-dequeue" id="btn-dequeue" disabled>Extraer (Dequeue)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generator Panel -->
+    <div class="generator">
+        <p>Generador de elementos. Arrástralos a la pila o la cola.</p>
+        <div class="source-zone" id="source-zone">
+            <!-- Items will be generated here by JS -->
+        </div>
+        <div class="controls" style="margin-top: 1rem;">
+            <button id="btn-generate">Generar Nuevo Elemento</button>
+        </div>
+    </div>
+
+    <script>
+        let counter = 1;
+        let draggedItem = null;
+
+        // --- DOM Elements ---
+        const sourceZone = document.getElementById('source-zone');
+        const stackZone = document.getElementById('stack-zone');
+        const queueZone = document.getElementById('queue-zone');
+        const btnPop = document.getElementById('btn-pop');
+        const btnDequeue = document.getElementById('btn-dequeue');
+        const btnGenerate = document.getElementById('btn-generate');
+
+        // --- Create New Draggable Item ---
+        function createItem() {
+            const el = document.createElement('div');
+            el.classList.add('item', 'item-spawn');
+            el.draggable = true;
+            el.textContent = counter++;
+            el.id = 'item-' + el.textContent;
+
+            // Drag Events
+            el.addEventListener('dragstart', handleDragStart);
+            el.addEventListener('dragend', handleDragEnd);
+
+            return el;
+        }
+
+        function generateSourceItem() {
+            const newItem = createItem();
+            sourceZone.appendChild(newItem);
+        }
+
+        // Initialize with a few items
+        generateSourceItem();
+        generateSourceItem();
+        generateSourceItem();
+
+        btnGenerate.addEventListener('click', generateSourceItem);
+
+        // --- Drag & Drop Handlers ---
+        function handleDragStart(e) {
+            draggedItem = this;
+            setTimeout(() => this.style.opacity = '0.5', 0);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            draggedItem = null;
+            updateButtons();
+            updateEmptyStates();
+        }
+
+        // Setup Dropzones
+        const dropzones = [stackZone, queueZone];
+
+        dropzones.forEach(zone => {
+            zone.addEventListener('dragover', e => {
+                e.preventDefault(); // Necessary to allow dropping
+                e.dataTransfer.dropEffect = 'move';
+                zone.classList.add('dragover');
+            });
+
+            zone.addEventListener('dragleave', e => {
+                zone.classList.remove('dragover');
+            });
+
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                
+                if (draggedItem) {
+                    // Prevent dragging between stack and queue once placed (optional)
+                    // We'll allow taking from source and moving between them for fun
+
+                    if (zone === stackZone) {
+                        // For stack, visually we want it on top. 
+                        // Because we use flex-direction: column-reverse, appending it puts it at the visual top.
+                        draggedItem.classList.remove('item-spawn', 'queue-item');
+                        draggedItem.classList.add('stack-item');
+                        stackZone.appendChild(draggedItem);
+                    } else if (zone === queueZone) {
+                        // For queue, appending puts it at the right (back of the queue).
+                        draggedItem.classList.remove('item-spawn', 'stack-item');
+                        draggedItem.classList.add('queue-item');
+                        queueZone.appendChild(draggedItem);
+                    }
+                }
+            });
+        });
+
+        // --- Updates States ---
+        function updateEmptyStates() {
+            if (stackZone.querySelectorAll('.item').length > 0) {
+                stackZone.classList.add('has-items');
+            } else {
+                stackZone.classList.remove('has-items');
+            }
+
+            if (queueZone.querySelectorAll('.item').length > 0) {
+                queueZone.classList.add('has-items');
+            } else {
+                queueZone.classList.remove('has-items');
+            }
+        }
+
+        function updateButtons() {
+            const stackCount = stackZone.querySelectorAll('.item').length;
+            const queueCount = queueZone.querySelectorAll('.item').length;
+            
+            btnPop.disabled = stackCount === 0;
+            btnDequeue.disabled = queueCount === 0;
+        }
+
+        // --- Actions (Pop & Dequeue) ---
+
+        // Stack: Last in, First out (Top item)
+        btnPop.addEventListener('click', () => {
+            const items = stackZone.querySelectorAll('.item');
+            if (items.length > 0) {
+                // last appended item is visually at the top due to column-reverse
+                const topItem = items[items.length - 1]; 
+                
+                // Disable drag while animating
+                topItem.draggable = false;
+                topItem.classList.add('animating-pop');
+                
+                setTimeout(() => {
+                    if (topItem.parentNode === stackZone) {
+                        stackZone.removeChild(topItem);
+                        updateButtons();
+                        updateEmptyStates();
+                    }
+                }, 400); // match animation duration
+            }
+        });
+
+        // Queue: First in, First out (Front item)
+        btnDequeue.addEventListener('click', () => {
+            const items = queueZone.querySelectorAll('.item');
+            if (items.length > 0) {
+                // first appended item is visually at the front (left)
+                const frontItem = items[0];
+                
+                frontItem.draggable = false;
+                frontItem.classList.add('animating-dequeue');
+                
+                setTimeout(() => {
+                    if (frontItem.parentNode === queueZone) {
+                        queueZone.removeChild(frontItem);
+                        updateButtons();
+                        updateEmptyStates();
+                    }
+                }, 400);
+            }
+        });
+
+    </script>
+</body>
+</html>
